@@ -17,42 +17,51 @@ struct data{
 
 struct data d1;
 
-void func(int sockfd)
+void func(int sockfd1, int sock_fd2)
 {
 		char option;
 
 		// Read the struct from client.
-		read(sockfd, &d1, sizeof(struct data));
+		read(sockfd1, &d1, sizeof(struct data));
 
 		// Print structure values received from the client.
-		printf("Before : %d\t, %f\t %c \n\n", d1.a, d1.f, d1.c);
-		printf("Press any key to continue and 'e' to exit ");
+ 		printf("Received data from client1\n");
+		printf("Before : %d,\t%f,\t%c \n", d1.a, d1.f, d1.c);
 
-		if (option = getchar() == 'e')
-			exit(0);
-
+		//Modifying received data from the client1
 		d1.a = 2 * d1.a;
 		d1.f = d1.f + 1;
-		d1.c++;
+  		if(d1.c == 'z'){
+			d1.c = 'a';
+		}
+		else{
+			d1.c++;
+		}
 
-		printf("After : %d\t, %f\t %c \n", d1.a, d1.f, d1.c);
-		write(sockfd, &d1, sizeof(struct data));
+		//Printing new data	
+		printf("After : %d,\t%f,\t%c \n", d1.a, d1.f, d1.c);
 
-		if (option == 'e') {
+		printf("Press any key to send data to client2 OR 'e' to exit: ");
+
+		if ((option = getchar() ) == 'e') {
 			printf("Exiting from server !\n");
 			exit(0);
+		}else{
+			write(sock_fd2, &d1, sizeof(struct data));
 		}
+
+
 }
 
 int main()
 {
-	int sock_fd, conn_fd, len;
-	struct sockaddr_in server_addr, cli;
+	int sock_fd, conn_fd1, conn_fd2, len;
+	struct sockaddr_in server_addr, cli1, cli2;
 
 	// creating and verifying socket
 	sock_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock_fd == -1) {
-		printf("socket creation failed !!\n");
+		printf("Socket creation failed !!\n");
 		exit(-1);
 	}
 	else
@@ -71,7 +80,7 @@ int main()
 		exit(0);
 	}
 	else
-		printf("bind successfull !\n");
+		printf("Bind successfull !\n");
 
 	if ((listen(sock_fd, 1)) != 0) {
 		printf("Listen failed !\n");
@@ -80,19 +89,27 @@ int main()
 	else
 		printf("Server listening..\n");
 
-	len = sizeof(cli);
+	len = sizeof(cli1);
 
-	// Accept the data from client.
-	conn_fd = accept(sock_fd, (struct sockaddr *)&cli, &len);
-	if (conn_fd < 0) {
+	// Accept the connection req from clients.
+	conn_fd1 = accept(sock_fd, (struct sockaddr *)&cli1, &len);
+	if (conn_fd1 < 0) {
 		printf("Accept failed !\n");
 		exit(0);
 	}
 	else
-		printf("Connection accepted\n");
+		printf("Connection accepted from client1 \n");
+
+	conn_fd2 = accept(sock_fd, (struct sockaddr *)&cli2, &len);
+	if (conn_fd2 < 0) {
+		printf("Accept failed !\n");
+		exit(0);
+	}
+	else
+		printf("Connection accepted from client2 \n");
 
 	// Function passing data between client and server
-	func(conn_fd);
+	func(conn_fd1, conn_fd2);
 
 	// close the socket
 	close(sock_fd);

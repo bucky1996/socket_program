@@ -10,8 +10,7 @@
 #include <netdb.h>
 
 
-#define MAX 80
-#define LOOPBACK "127.0.0.1"
+#define IP_ADDR "127.0.0.1"
 #define PORT 8081
 #define hostname "google.com"
 
@@ -28,28 +27,12 @@ void func(int sock)
 {
 	   	char option;
 
-		printf("Press e to exit : ");
+		printf("Waiting to receive data from server...\n ");
 
-		if ((option = getchar()) == 'e')
-			exit(0);
-
- 		d2.a = 11;
-		d2.f = 2.3;
-		d2.c = 'q';
-
-
-		write(sock, &d2, sizeof(struct data));
-
-		
-		//bzero(&d2, sizeof(struct data));
 		read(sock, &d2, sizeof(struct data));
 
-		printf("From Server : %d\t %f\t %c\n", d2.a, d2.f, d2.c);
+		printf("Data received from Server : %d\t %f\t %c\n", d2.a, d2.f, d2.c);
 
-		if (option == 'e') {
-			printf("Exiting from client !\n");
-			exit(0);
-		}
 }
 
 int main()
@@ -73,7 +56,7 @@ int main()
 
 	// assign IP, PORT
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = inet_addr(LOOPBACK);
+	server_addr.sin_addr.s_addr = inet_addr(IP_ADDR);
 	server_addr.sin_port = htons(PORT);
 
 	// connect the client socket to server socket
